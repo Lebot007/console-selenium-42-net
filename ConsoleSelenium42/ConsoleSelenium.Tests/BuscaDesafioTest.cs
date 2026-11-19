@@ -57,4 +57,30 @@ public class BuscaDesafioTest
             urlDecodificada.Contains(textoSugestao, StringComparison.OrdinalIgnoreCase),
             $"Resultados não correspondem à sugestão '{textoSugestao}'. Título: '{resultados.Title}'");
     }
+
+    // Exercício 3: navegação por histórico (Voltar)
+    [TestMethod]
+    public void Historico_AbrirResultadoEVoltar_DeveRestaurarPaginaDeResultados()
+    {
+        const string termo = "Automated Testing";
+
+        var resultados = _home.Open().Search(termo);
+        var urlResultados = resultados.Url;
+
+        resultados.OpenFirstOrganicResult();
+
+        Assert.IsTrue(Uri.IsWellFormedUriString(_driver.Url, UriKind.Absolute), $"URL externa inválida: {_driver.Url}");
+        Assert.IsFalse(_driver.Url.Contains("duckduckgo.com", StringComparison.OrdinalIgnoreCase),
+            $"A página externa não foi carregada. URL atual: {_driver.Url}");
+
+        _driver.Navigate().Back();
+        var restaurada = new ResultsPage(_driver).WaitUntilLoaded();
+
+        Assert.IsTrue(ResultsPage.IsResultsUrl(restaurada.Url), $"Não voltou para os resultados: {restaurada.Url}");
+        Assert.IsTrue(restaurada.HasResults(), "A lista de resultados não foi restaurada.");
+        StringAssert.Contains(
+            Uri.UnescapeDataString(restaurada.Url).Replace('+', ' ').ToLowerInvariant(),
+            termo.ToLowerInvariant(),
+            $"A busca restaurada difere da original ({urlResultados}).");
+    }
 }
