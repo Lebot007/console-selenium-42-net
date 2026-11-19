@@ -38,4 +38,23 @@ public class BuscaDesafioTest
             urlDecodificada.Contains(termo, StringComparison.OrdinalIgnoreCase),
             $"Termo não encontrado. Título: '{resultados.Title}' | URL: '{resultados.Url}'");
     }
+
+    // Exercício 2: autocompletar (sugestões dinâmicas) com espera explícita
+    [TestMethod]
+    public void Autocompletar_CliqueNaTerceiraSugestao_DeveAbrirResultadosDaOpcao()
+    {
+        const string termo = "C# unit testing";
+
+        _home.Open().Type(termo);
+        var (textoSugestao, resultados) = _home.ClickSuggestion(3);
+
+        Assert.IsFalse(string.IsNullOrWhiteSpace(textoSugestao), "A terceira sugestão não possui texto.");
+        Assert.IsTrue(ResultsPage.IsResultsUrl(resultados.Url), $"Não redirecionou para resultados: {resultados.Url}");
+
+        var urlDecodificada = Uri.UnescapeDataString(resultados.Url).Replace('+', ' ');
+        Assert.IsTrue(
+            resultados.Title.Contains(textoSugestao, StringComparison.OrdinalIgnoreCase) ||
+            urlDecodificada.Contains(textoSugestao, StringComparison.OrdinalIgnoreCase),
+            $"Resultados não correspondem à sugestão '{textoSugestao}'. Título: '{resultados.Title}'");
+    }
 }
