@@ -37,7 +37,7 @@ public class ResultsPage
     public string OpenFirstOrganicResult()
     {
         var firstLink = Waits.Visible(_driver, OrganicResultLinks);
-        var href = firstLink.GetAttribute("href") ?? string.Empty;
+        var href = firstLink.GetDomProperty("href") ?? string.Empty;
 
         // Garante abertura na mesma aba, preservando o histórico para o Back().
         ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].removeAttribute('target');", firstLink);
